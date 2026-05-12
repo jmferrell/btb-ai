@@ -326,6 +326,36 @@ class BaseCharacter(ABC):
             # Find the most recent interaction with this speaker
             last_interaction = self._get_last_interaction(speaker)
             if not last_interaction:
+                # FIX: Fall back to known_players data before declaring first interaction.
+                # recent_events only holds the last 10 interactions across ALL players,
+                # so a known visitor can fall out of it even though they're well remembered.
+                if (
+                    "known_players" in self.memories
+                    and speaker in self.memories["known_players"]
+                ):
+                    player_data = self.memories["known_players"][speaker]
+                    if player_data.get("visit_count", 0) > 1:
+                        time_context["is_first_interaction"] = False
+                        # Use previous_visit if available, otherwise last_visit
+                        ref_time = player_data.get(
+                            "previous_visit", player_data.get("last_visit", 0)
+                        )
+                        if ref_time > 0:
+                            time_since = current_time - ref_time
+                            time_context["time_since_last"] = time_since
+                            time_context["hours_since_last"] = time_since / 3600
+                            time_context["days_since_last"] = time_since / (3600 * 24)
+                            time_context["last_interaction_time_of_day"] = get_time_context(ref_time)
+                            self._set_time_guidance(time_context)
+                        else:
+                            time_context["prompt_guidance"] = (
+                                f"You know {speaker} well — they've visited {player_data['visit_count']} times. "
+                                "Greet them as a familiar face, not a stranger."
+                            )
+                        self.logger.debug(
+                            f"TIME AWARENESS: No recent_events for {speaker} but found "
+                            f"{player_data['visit_count']} visits in known_players — treating as known."
+                        )
                 return time_context
 
             # Not the first interaction
