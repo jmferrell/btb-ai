@@ -873,7 +873,9 @@ class TimCharacter(BaseCharacter):
         if greeting:
             # Add to message buffer
             add_message("assistant", greeting, self.name)
-
+            self._update_memory_with_interaction(
+                            person, f"{person} entered the Tavern", greeting
+                        )
             # Mark as acknowledged
             self._acknowledge_tavern_event(person, "entry")
 
@@ -894,7 +896,7 @@ class TimCharacter(BaseCharacter):
         visitor_info = self.tavern_state["visitor_history"].get(person, {})
         last_exit_time = visitor_info.get("last_exit", 0)
         last_entry_time = visitor_info.get("last_entry", 0)
-        
+
         # Calculate time since they were last here
         if last_exit_time > 0:
             # They left at some point - use exit time
@@ -1112,6 +1114,9 @@ class TimCharacter(BaseCharacter):
         if greeting:
             # Add to message buffer
             add_message("assistant", greeting, self.name)
+            self._update_memory_with_interaction(
+                            person, f"{person} takes a seat at the Bar", greeting
+                        )
             return greeting
         else:
             # Fallback if API fails - choose based on time context
