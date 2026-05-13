@@ -267,7 +267,7 @@ class TimCharacter(BaseCharacter):
             return "bar_seating"
 
         # Check for actual arrivals (entering through the door)
-        if "enters through" in text and "door" in text:
+        if ("enters through" in text and "door" in text) or "wanders in from The Pass-Out Room" in text:
             return "true_arrival"
 
         # Generic arrival notification - we want to ignore for responses
