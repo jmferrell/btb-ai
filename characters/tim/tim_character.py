@@ -163,12 +163,17 @@ class TimCharacter(BaseCharacter):
 
         # Track arrivals and respond
         elif classified_event == "true_arrival":
-            # Extract person name
-            person = text.split(" enters through")[0].strip()
+            # Extract person name - handle both door and Pass-Out Room arrivals
+            if "enters through" in text:
+                person = text.split(" enters through")[0].strip()
+            elif "wanders in from" in text:
+                person = text.split(" wanders in from")[0].strip()
+            else:
+                person = text.split(" ")[0].strip()  # fallback: first word
+
             self.logger.info(f"Processing TRUE arrival for: {person}")
             self._update_tavern_occupants(person, "enter")
 
-            # Immediately return a greeting if appropriate
             if self._should_greet_arrival(person):
                 return self._generate_greeting_response(person, context)
 
