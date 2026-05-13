@@ -655,9 +655,9 @@ class TimCharacter(BaseCharacter):
             # Skip processing if already considered present
             if entrant in self.tavern_state["current_occupants"]:
                 self.logger.info(
-                    f"{entrant} is already marked as present, skipping duplicate entry"
+                    f"{entrant} is already marked as present but re-entered — resetting for fresh greeting"
                 )
-                return
+                self.tavern_state["current_occupants"].remove(entrant)
 
             # Check if this is a rapid re-entry
             rapid_reentry = False
